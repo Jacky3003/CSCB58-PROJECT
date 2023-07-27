@@ -44,13 +44,14 @@
 
 # Constants
 .eqv baseAddress 0x10008000
-.eqv sleepTime 1500
+.eqv sleepTime 1000
 
-# Game Variables, 8160 is the maximun coordinate
+# Game Variables, 8192 is the maximun coordinate
 playerStartPos: .word 520, 524, 776, 780
 #currPos: .word 520, 524, 776, 780
 currPos: .word 520, 524, 776, 780
 platPos: .word 0:8
+platColors: .word 0:8
 enemyPos: .word 0, 0, 0, 0, 0
 projpos: .word 0
 # A test message for debugging.
@@ -63,7 +64,7 @@ clear:
 	li $t1, 0x000000
 	addi $t2, $zero, 0
 	reloadMap:
-		beq $t2, 8164, nextOne
+		beq $t2, 8192, nextOne
 		sw $t1, 0($t0)
 		addi $t0, $t0, 4
 		addi $t2, $t2, 4
@@ -88,7 +89,6 @@ clear:
 		j resetProj
 	resetProj:
 		j loadCharacter
-		
 		
 #TODO
 # Left and Right movement DONE
@@ -152,6 +152,7 @@ loadInnerWalls:
 	sw $t1, 332($t0)
 	sw $t1, 328($t0)
 	sw $t1, 336($t0)
+	sw $t1, 340($t0)
 	addi $t0, $t0, 256
 	addi $t3, $t3, -1
 	bnez $t3, loadInnerWalls
@@ -248,28 +249,39 @@ loadPlatforms:
 	li $t0, baseAddress
 	li $t3, 32
 	li $t1, 0x999fc2
+	li $t4, 0
 	platTwoX:
 		addi $t0, $t0, 4
+		addi $t4, $t4, 4
 		addi $t3, $t3, -1
 		bnez $t3, platTwoX
 	li $t3, 8
 	platTwoY:
 		addi $t0, $t0, 256
+		addi $t4, $t4, 256
 		addi $t3, $t3, -1
 		bnez $t3, platTwoY
 	li $t3, 4
+	la $a0, platPos
 	loadPlatTwoA:
 		sw $t1, 0($t0)
+		sw $t4, 0($a0)
 		addi $t0, $t0, 4
+		addi $a0, $a0, 4
+		addi $t4, $t4, 4
 		addi $t3, $t3, -1
 		bnez $t3, loadPlatTwoA
 	addi $t0, $t0, 256
+	addi $t4, $t4, 252
 	addi $t0, $t0, -4
 	li $t3, 4
 	li $t1, 0x585b6f
 	loadPlatTwoB:
 		sw $t1, 0($t0)
+		sw $t4, 0($a0)
+		addi $a0, $a0, 4
 		addi $t0, $t0, -4
+		addi $t4, $t4, -4
 		addi $t3, $t3, -1
 		bnez $t3, loadPlatTwoB
 
@@ -313,12 +325,9 @@ loadDetails:
 	loadSpikes:
 		spikeOne:
 			li $t1, 0xfbbe27
-			sw $t1, 7716($t0)
 			sw $t1, 7464($t0)
 			sw $t1, 7468($t0)
-			sw $t1, 7724($t0)
 			li $t1, 0xffdc85
-			sw $t1, 7720($t0)
 			sw $t1, 7208($t0)
 			sw $t1, 7212($t0)
 		spikeTwo:
@@ -361,11 +370,11 @@ loadDetails:
 			sw $t1, 7368($t0)
 	loadHealth:
 		li $t1, 0x0284be
+		sw $t1, 3932($t0)
 		sw $t1, 3928($t0)
-		sw $t1, 3924($t0)
-		sw $t1, 3668($t0)
 		li $t1, 0x0be1f5
 		sw $t1, 3672($t0)
+		sw $t1, 3676($t0)
 	loadGravPack:
 		li $t1 0xe2d2e7
 		sw $t1, 7412($t0)
@@ -483,21 +492,13 @@ loadDetails:
 
 main:	
 	#reset registers
-	addi $t0, $t0, 0
-	addi $t1, $t1, 0
-	addi $t2, $t2, 0
-	addi $t3, $t3, 0
-	addi $t4, $t4, 0
-	addi $t5, $t5, 0
-	addi $t6, $t6, 0
-	addi $t7, $t7, 0
-	addi $t8, $t8, 0
-	addi $t9, $t9, 0
-	addi $a0, $a0, 0
-	addi $a1, $a1, 0
-	addi $a2, $a2, 0
-	addi $a3, $a3, 0
-	# Check for keypresses
+	jal resetRegisters
+	
+	# Other Movement
+	
+	# Check if player has been redrawn to black
+	
+	# Check for keypresses, movement, shooting
 	li $t9, 0xffff0000
 	lw $t8, 0($t9)
 	beq $t8, 1, keyPress
@@ -517,18 +518,43 @@ main:
 		j gravityLoop
 		checkGravCol:
 			li $t0, baseAddress
-			li $t8, 0x000000
+			
 			add $t0, $t0, $t1
 			lw $t4, 0($t0)
+			
+			li $t8, 0xfbbe27
+			beq $t4, $t8,  loseScreen
+		
+			li $t8, 0xffdc85
+			beq $t4, $t8,  loseScreen
+			
+			li $t8, 0x000000
 			beq $t4, $t8, backGrav
 			j main
-			
 	backMain:
 		jal changePosGrav
+	#loop back to main
 	li $v0, 32
 	li $a0, sleepTime
 	syscall
 	j main
+
+resetRegisters:
+	addi $t0, $t0, 0
+	addi $t1, $t1, 0
+	addi $t2, $t2, 0
+	addi $t3, $t3, 0
+	addi $t4, $t4, 0
+	addi $t5, $t5, 0
+	addi $t6, $t6, 0
+	addi $t7, $t7, 0
+	addi $t8, $t8, 0
+	addi $t9, $t9, 0
+	addi $a0, $a0, 0
+	addi $a1, $a1, 0
+	addi $a2, $a2, 0
+	addi $a3, $a3, 0
+	jr $ra
 
 keyPress:
 	lw $t2, 4($t9)
@@ -556,8 +582,9 @@ up:
 	jumpLoop:
 		beq $t3, 16, jumpMove
 		lw $t2, 0($a0)
-		addi $t2, $t2, -1536
-		sw $t2, 0($a0)
+		addi $t8, $t2, -1536
+		jal checkJumpCol
+		sw $t8, 0($a0)
 		addi $t3, $t3, 4
 		addi $a0, $a0, 4
 		j jumpLoop
@@ -582,6 +609,39 @@ jumpMove:
 			addi $t4, $t4, 4
 			addi $a0, $a0, 4
 			j jumpChange
+checkJumpCol:
+	li $t0, baseAddress
+	add $t0, $t0, $t8
+	addi $t6, $zero, 0
+	vertCol:
+		addi $t7, $zero, 0
+		lw $t1, 0($t0)
+		
+		li $t2, 0xfbbe27
+		beq $t1, $t2,  loseScreen
+		
+		li $t2, 0xffdc85
+		beq $t1, $t2,  loseScreen
+		
+		li $t2, 0x000000
+		beq $t1, $t2, checkOneVert
+		addi $t7, $t7, 1
+		checkOneVert:
+			li $t2, 0xffffff
+			beq $t1, $t2, checkTwoVert
+		addi $t7, $t7, 1
+		checkTwoVert:
+			li $t2, 0x7de7ff 
+			beq $t1, $t2, checkThreeVert
+		addi $t7, $t7, 1
+		checkThreeVert:
+			beq $t7, 3, main
+			addi $t6, $t6, 4
+			add $t0, $t0, 256
+			bne $t6, 24, vertCol
+	li $t0, baseAddress
+	jr $ra
+
 reset:
 	j clear
 	
@@ -660,6 +720,15 @@ checkLeftRightCol:
 	addi $t7, $zero, 0
 	horCol:
 		lw $t1, 0($t0)
+		li $t2, 0xdcff4b
+		beq $t1, $t2,  winScreen
+		
+		li $t2, 0xfbbe27
+		beq $t1, $t2,  loseScreen
+		
+		li $t2, 0xffdc85
+		beq $t1, $t2,  loseScreen
+		
 		li $t2, 0x000000
 		beq $t1, $t2, checkOne
 		addi $t7, $t7, 1
@@ -698,3 +767,198 @@ changePosGrav:
 		j changePosGravEach
 	gravEnd:
 		jr $ra
+winScreen:
+	li $t0, baseAddress
+	li $t1, 0x000000
+	addi $t2, $zero, 0
+	reloadMapWin:
+		beq $t2, 8192, winScreenShow
+		sw $t1, 0($t0)
+		addi $t0, $t0, 4
+		addi $t2, $t2, 4
+		j reloadMapWin
+winScreenShow:
+	li $t0, baseAddress
+	li $t1, 0xffffff
+	# Write You Win
+	sw $t1, 4160($t0) #Y
+	sw $t1, 4416($t0)
+	sw $t1, 4672($t0)
+	
+	sw $t1, 4676($t0)
+	sw $t1, 4680($t0)
+	sw $t1, 4684($t0)
+	
+	sw $t1, 4172($t0)
+	sw $t1, 4428($t0)
+	sw $t1, 4684($t0)
+	sw $t1, 4940($t0)
+	
+	sw $t1, 4180($t0) #O
+	sw $t1, 4436($t0)
+	sw $t1, 4692($t0)
+	sw $t1, 4948($t0)
+	sw $t1, 4184($t0)
+	sw $t1, 4188($t0)
+	sw $t1, 4192($t0)
+	sw $t1, 4448($t0)
+	sw $t1, 4704($t0)
+	sw $t1, 4960($t0)
+	sw $t1, 4952($t0)
+	sw $t1, 4956($t0)
+	
+	sw $t1, 4968($t0) #U
+	sw $t1, 4972($t0)
+	sw $t1, 4976($t0)
+	sw $t1, 4980($t0)
+	sw $t1, 4712($t0)
+	sw $t1, 4456($t0)
+	sw $t1, 4200($t0)
+	sw $t1, 4724($t0)
+	sw $t1, 4468($t0)
+	sw $t1, 4212($t0)
+	
+	sw $t1, 4992($t0) #W
+	sw $t1, 4736($t0)
+	sw $t1, 4480($t0)
+	sw $t1, 4224($t0)
+	sw $t1, 4996($t0)
+	sw $t1, 5000($t0)
+	sw $t1, 5004($t0)
+	sw $t1, 4748($t0)
+	sw $t1, 4744($t0)
+	sw $t1, 4492($t0)
+	sw $t1, 4236($t0)
+	
+	sw $t1, 5012($t0) #I
+	sw $t1, 5016($t0)
+	sw $t1, 5020($t0)
+	sw $t1, 5024($t0)
+	sw $t1, 4760($t0)
+	sw $t1, 4504($t0)
+	sw $t1, 4248($t0)
+	sw $t1, 4244($t0)
+	sw $t1, 4252($t0)
+	sw $t1, 4256($t0)
+	
+	sw $t1, 5032($t0) #N
+	sw $t1, 4776($t0)
+	sw $t1, 4520($t0)
+	sw $t1, 4264($t0)
+	sw $t1, 4268($t0)
+	sw $t1, 4528($t0)
+	sw $t1, 4532($t0)
+	sw $t1, 4788($t0)
+	sw $t1, 5044($t0)
+	sw $t1, 4276($t0)
+	
+	li $v0, 32
+	li $a0, 10000
+	syscall
+	j clear
+
+loseScreen:
+	li $t0, baseAddress # $t0 stores the base address for display
+	li $t1, 0x000000
+	addi $t2, $zero, 0
+	reloadMapLose:
+		beq $t2, 8192, loseScreenShow
+		sw $t1, 0($t0)
+		addi $t0, $t0, 4
+		addi $t2, $t2, 4
+		j reloadMapLose
+
+loseScreenShow:
+	li $t0, baseAddress
+	li $t1, 0xffffff
+	# Write You Lose
+	sw $t1, 4160($t0) #Y
+	sw $t1, 4416($t0)
+	sw $t1, 4672($t0)
+	
+	sw $t1, 4676($t0)
+	sw $t1, 4680($t0)
+	sw $t1, 4684($t0)
+	
+	sw $t1, 4172($t0)
+	sw $t1, 4428($t0)
+	sw $t1, 4684($t0)
+	sw $t1, 4940($t0)
+	
+	sw $t1, 4180($t0) #O
+	sw $t1, 4436($t0)
+	sw $t1, 4692($t0)
+	sw $t1, 4948($t0)
+	sw $t1, 4184($t0)
+	sw $t1, 4188($t0)
+	sw $t1, 4192($t0)
+	sw $t1, 4448($t0)
+	sw $t1, 4704($t0)
+	sw $t1, 4960($t0)
+	sw $t1, 4952($t0)
+	sw $t1, 4956($t0)
+	
+	sw $t1, 4968($t0) #U
+	sw $t1, 4972($t0)
+	sw $t1, 4976($t0)
+	sw $t1, 4980($t0)
+	sw $t1, 4712($t0)
+	sw $t1, 4456($t0)
+	sw $t1, 4200($t0)
+	sw $t1, 4724($t0)
+	sw $t1, 4468($t0)
+	sw $t1, 4212($t0)
+	
+	sw $t1, 4992($t0) #L
+	sw $t1, 4736($t0)
+	sw $t1, 4480($t0)
+	sw $t1, 4224($t0)
+	sw $t1, 4996($t0)
+	sw $t1, 5000($t0)
+	sw $t1, 5004($t0)
+	
+	sw $t1, 5012($t0) #O
+	sw $t1, 5016($t0)
+	sw $t1, 5020($t0)
+	sw $t1, 5024($t0)
+	sw $t1, 4756($t0)
+	sw $t1, 4768($t0)
+	sw $t1, 4500($t0)
+	sw $t1, 4512($t0)
+	sw $t1, 4248($t0)
+	sw $t1, 4244($t0)
+	sw $t1, 4252($t0)
+	sw $t1, 4256($t0)
+	
+	sw $t1, 5036($t0) #S
+	sw $t1, 5040($t0)
+	sw $t1, 5044($t0)
+	sw $t1, 4788($t0)
+	sw $t1, 4784($t0)
+	sw $t1, 4780($t0)
+	sw $t1, 4776($t0)
+	sw $t1, 4520($t0)
+	sw $t1, 4264($t0)
+	sw $t1, 4268($t0)
+	sw $t1, 4272($t0)
+	sw $t1, 4276($t0)
+	
+	sw $t1, 5052($t0) #E
+	sw $t1, 5056($t0)
+	sw $t1, 5060($t0)
+	sw $t1, 5064($t0)
+	sw $t1, 4796($t0)
+	sw $t1, 4540($t0)
+	sw $t1, 4544($t0)
+	sw $t1, 4548($t0)
+	sw $t1, 4284($t0)
+	sw $t1, 4288($t0)
+	sw $t1, 4292($t0)
+	sw $t1, 4296($t0)
+	
+	li $v0, 32
+	li $a0, 10000
+	syscall
+	j clear
+		
+	
