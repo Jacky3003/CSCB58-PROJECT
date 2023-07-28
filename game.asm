@@ -54,6 +54,9 @@ platPos: .word 0:8
 platColors: .word 0:8
 enemyPos: .word 0, 0, 0, 0, 0
 projpos: .word 0
+warpArrLoc: .word 640, 644, 896, 900
+reduceEnemiesLoc: .word 3672, 3676, 3928, 3932
+reducePlatformsLoc: .word 7408, 7412, 7664, 7668
 # A test message for debugging.
 TEST_MSG: .asciiz "Testing Controls...\n"
 
@@ -368,14 +371,14 @@ loadDetails:
 			sw $t1, 7628($t0)
 			sw $t1, 7372($t0)
 			sw $t1, 7368($t0)
-	loadHealth:
+	loadReduceEnemies:
 		li $t1, 0x0284be
 		sw $t1, 3932($t0)
 		sw $t1, 3928($t0)
 		li $t1, 0x0be1f5
 		sw $t1, 3672($t0)
 		sw $t1, 3676($t0)
-	loadGravPack:
+	loadReducePlatforms:
 		li $t1 0xe2d2e7
 		sw $t1, 7412($t0)
 		sw $t1, 7664($t0)
@@ -527,6 +530,15 @@ main:
 		
 			li $t8, 0xffdc85
 			beq $t4, $t8,  loseScreen
+			
+			li $t8, 0xcba591
+			beq $t4, $t8,  warpTo
+			
+			li $t8, 0x0be1f5
+			beq $t4, $t8, reduceEnemies
+			
+			li $t8, 0xac6ca1
+			beq $t4, $t8, reducePlatforms
 			
 			li $t8, 0x000000
 			beq $t4, $t8, backGrav
@@ -729,6 +741,15 @@ checkLeftRightCol:
 		li $t2, 0xffdc85
 		beq $t1, $t2,  loseScreen
 		
+		li $t2, 0xcba591
+		beq $t1, $t2, warpTo
+		
+		li $t2, 0x0be1f5
+		beq $t1, $t2, reduceEnemies
+		
+		li $t2, 0xac6ca1
+		beq $t1, $t2, reducePlatforms
+		
 		li $t2, 0x000000
 		beq $t1, $t2, checkOne
 		addi $t7, $t7, 1
@@ -747,7 +768,133 @@ checkLeftRightCol:
 			bne $t6, 8, horCol
 	li $t0, baseAddress
 	jr $ra
-
+	warpTo:
+		# make item dissapear
+		li $t2, 0x000000
+		li $t0, baseAddress
+		addi $t0, $t0, 4848
+		sw $t2, 0($t0)
+		sw $t2, 4($t0)
+		sw $t2, 256($t0)
+		sw $t2, 260($t0)
+		# Normally when an item is collected, put the player in the new position, but this item warps location,
+		# So instead move the player when location gets warped.
+		li $t0, baseAddress
+		la $a0, currPos
+		la $a1, warpArrLoc
+		li $t3, 0
+		warpLoop:
+			li $t2, 0x000000
+			li $t0, baseAddress
+			lw $t4, 0($a0)
+			add $t0, $t0, $t4
+			lw $t6, 0($t0)
+			sw $t2, 0($t0)
+			lw $t5, 0($a1)
+			add $t4, $zero, $t5
+			sw $t4, 0($a0)
+			# redraw the pixel
+			li $t0, baseAddress
+			add $t0, $t0, $t5
+			sw $t6, 0($t0)
+			
+			addi $a0, $a0, 4
+			addi $a1, $a1, 4
+			addi $t3, $t3, 4
+			blt $t3, 16, warpLoop
+		j main
+	reduceEnemies:
+		li $t2, 0x000000
+		li $t0, baseAddress
+		sw $t2, 2112($t0)
+		sw $t2, 2368($t0)
+		sw $t2, 2372($t0)	
+		sw $t2, 2116($t0)	
+		sw $t2, 2108($t0)
+		sw $t2, 2104($t0)
+		sw $t2, 2364($t0)
+		sw $t2, 2360($t0)
+		sw $t2, 3592($t0)
+		sw $t2, 3596($t0)
+		sw $t2, 3848($t0)
+		sw $t2, 3852($t0)
+		sw $t2, 4104($t0)
+		sw $t2, 4108($t0)
+		sw $t2, 4360($t0)
+		sw $t2, 4364($t0)
+		
+		# make item dissapear
+		li $t0, baseAddress
+		la $a0, currPos
+		la $a1, reduceEnemiesLoc
+		li $t3, 0
+		reduceEnemiesLoop:
+			li $t2, 0x000000
+			li $t0, baseAddress
+			lw $t4, 0($a0)
+			add $t0, $t0, $t4
+			lw $t6, 0($t0)
+			sw $t2, 0($t0)
+			lw $t5, 0($a1)
+			add $t4, $zero, $t5
+			sw $t4, 0($a0)
+			# redraw the pixel
+			li $t0, baseAddress
+			add $t0, $t0, $t5
+			sw $t6, 0($t0)
+			addi $a0, $a0, 4
+			addi $a1, $a1, 4
+			addi $t3, $t3, 4
+			blt $t3, 16, reduceEnemiesLoop
+		j main
+	reducePlatforms:
+		li $t2, 0x000000
+		li $t0, baseAddress
+		sw $t2, 3360($t0)
+		sw $t2, 3364($t0)
+		sw $t2, 3368($t0)
+		sw $t2, 3372($t0)
+		sw $t2, 3376($t0)
+		sw $t2, 3380($t0)
+		sw $t2, 3104($t0)
+		sw $t2, 3108($t0)
+		sw $t2, 3112($t0)
+		sw $t2, 3116($t0)
+		sw $t2, 3120($t0)
+		sw $t2, 3124($t0)
+		
+		sw $t2, 1352($t0)
+		sw $t2, 1356($t0)
+		sw $t2, 1360($t0)
+		sw $t2, 1364($t0)
+		sw $t2, 1096($t0)
+		sw $t2, 1100($t0)
+		sw $t2, 1104($t0)
+		sw $t2, 1108($t0)	
+		
+		li $t0, baseAddress
+		la $a0, currPos
+		la $a1, reducePlatformsLoc
+		li $t3, 0
+		reducePlatformsLoop:
+			li $t2, 0x000000
+			li $t0, baseAddress
+			lw $t4, 0($a0)
+			add $t0, $t0, $t4
+			lw $t6, 0($t0)
+			sw $t2, 0($t0)
+			lw $t5, 0($a1)
+			add $t4, $zero, $t5
+			sw $t4, 0($a0)
+			# redraw the pixel
+			li $t0, baseAddress
+			add $t0, $t0, $t5
+			sw $t6, 0($t0)
+			addi $a0, $a0, 4
+			addi $a1, $a1, 4
+			addi $t3, $t3, 4
+			blt $t3, 16, reducePlatformsLoop
+		j main
 changePosGrav:
 	la $a1, currPos
 	addi $t3, $zero, 0
