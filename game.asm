@@ -44,7 +44,7 @@
 
 # Constants
 .eqv baseAddress 0x10008000
-.eqv sleepTime 1000
+.eqv sleepTime 250
 
 # Game Variables, 8192 is the maximun coordinate
 playerStartPos: .word 520, 524, 776, 780
@@ -52,8 +52,9 @@ playerStartPos: .word 520, 524, 776, 780
 currPos: .word 520, 524, 776, 780
 platPos: .word 0:8
 platColors: .word 0:8
-enemyPos: .word 0, 0, 0, 0, 0
-projpos: .word 0
+enemyProjPos: .word 4968, 5032
+projPos: .word 0, 0
+projPosLeft: .word 0, 0
 warpArrLoc: .word 640, 644, 896, 900
 reduceEnemiesLoc: .word 3672, 3676, 3928, 3932
 reducePlatformsLoc: .word 7408, 7412, 7664, 7668
@@ -133,7 +134,6 @@ loadFloor:
 	addi $t0, $t0, 4
 	addi $t3, $t3, -1
 	bnez $t3, loadFloor
-	
 	li $t3, 32
 	li $t0, baseAddress
 # Loads the Left and Right borders
@@ -320,11 +320,16 @@ loadDetails:
 		sw $t1, 2032($t0)
 	loadEnemy:
 		li $t1, 0xfbbe27
-		sw $t1, 4712($t0)
-		sw $t1, 4968($t0)
-		sw $t1, 4964($t0)
-		li $t1, 0xffdc85
 		sw $t1, 4708($t0)
+		sw $t1, 4964($t0)
+		sw $t1, 4960($t0)
+		li $t1, 0xffdc85
+		sw $t1, 4704($t0)
+		
+		sw $t1, 4968($t0)
+		sw $t1, 4972($t0)
+		sw $t1, 4712($t0)
+		sw $t1, 4716($t0)
 	loadSpikes:
 		spikeOne:
 			li $t1, 0xfbbe27
@@ -494,12 +499,182 @@ loadDetails:
 .globl main
 
 main:	
-	#reset registers
 	jal resetRegisters
+	# In the event that the player changes colour at the current position to black, move to the game over screen
+	la $a0, currPos
+	lw $t1, 0($a0)
+	la $a1, baseAddress
+	add $a1, $a1, $t1
+	lw $t2, 0($a1)
+	li $t3, 0x000000
+	beq $t2, $t3, loseScreen
 	
-	# Other Movement
+	# Enemy Projectile
+	la $a0, baseAddress # 4968 is where the projectile should originate from, so it should spawn at 4972
+	la $a1, enemyProjPos
 	
+	lw $t0, 0($a1)
+	lw $t4, 4($a1)
+
+	beq $t0, $t4, backMainFour
+	
+	moveEnemyProj:
+		li $v0, 32
+		li $a0, sleepTime
+		syscall
+		la $a0, baseAddress
+		addi $t0, $t0, 8
+		add $a0, $t0, $a0
+		lw $t3, -8($a0)
+		li $t1, 0x000000
+		
+		sw $t1, -8($a0)
+		sw $t1, -4($a0)
+		sw $t1, -260($a0)
+		sw $t1, -264($a0)
+		
+		sw $t3, 0($a0)
+		sw $t3, 4($a0)
+		sw $t3, -256($a0)
+		sw $t3, -252($a0)
+		sw $t0, 0($a1)
+	backMainFour:
+	bne $t0, $t4, backMainFive
+	setEnemyProj:
+		la $a0, baseAddress
+		add $a0, $a0, $t4
+		li $t5, 0x000000
+		sw $t5, 0($a0)
+		sw $t5, 4($a0)
+		sw $t5, -256($a0)
+		sw $t5, -252($a0)
+		li $t0, 4968
+		la $a0, baseAddress
+		add $a0, $a0, $t0
+		li $t5, 0xffdc85
+		sw $t5, 0($a0)
+		sw $t5, 4($a0)
+		sw $t5, -256($a0)
+		sw $t5, -252($a0)
+		sw $t0, 0($a1)
+	backMainFive:
+	# Player projectile
+	la $a0, projPos
+	lw $t0, 0($a0)
+	beqz $t0, backMainTwo
+	playerProjMovement:
+		li $v0, 32
+		li $a0, sleepTime
+		syscall
+		la $a0, projPos
+		lw $t0, 0($a0)
+		lw $t1, 4($a0)
+		sub $t2, $t1, $t0
+		beq $t2, 20, deleteProj
+		
+		la $a1, baseAddress
+		li $t3, 0x000000
+		add $a1, $a1, $t1
+		sw $t3, 0($a1)
+		
+		li $t3, 0xfbbe27 
+		lw $t4, 4($a1)
+		beq $t4, $t3, projReplace
+		
+		li $t3, 0xffdc85
+		lw $t4, 4($a1)
+		beq $t4, $t3, projReplace
+		
+		li $t3, 0x000000
+		lw $t4, 4($a1)
+		bne $t4, $t3, deleteProj
+		
+		li $t3, 0x0051ff
+		addi $t1, $t1, 4
+		sw $t3, 4($a1)
+		sw $t1, 4($a0)
+		j backMainTwo
+		deleteProj:
+			la $t2, baseAddress
+			add $t2, $t2, $t1
+			add $t0, $zero, $zero
+			sw $t0, 0($a0)
+			li $t3, 0x000000
+			sw $t3, 0($t2)
+			j backMainTwo
+		projReplace:
+			la $t2, baseAddress
+			add $t2, $t2, $t1
+			add $t0, $zero, $zero
+			sw $t0, 0($a0)
+			li $t3, 0x000000
+			sw $t3, 0($t2)
+			li $t3, 0x0051ff
+			sw $t3, 4($t2)
+			sw $t3, 8($t2)
+			sw $t3, 260($t2)
+			sw $t3, 264($t2)
+			j backMainTwo
+	backMainTwo:
 	# Check if player has been redrawn to black
+	
+	la $a0, projPosLeft
+	lw $t0, 0($a0)
+	beqz $t0, backMainThree
+	playerProjMovementLeft:
+		li $v0, 32
+		li $a0, sleepTime
+		syscall
+		la $a0, projPosLeft
+		lw $t0, 0($a0)
+		lw $t1, 4($a0)
+		sub $t2, $t1, $t0
+		beq $t2, -20, deleteProjLeft
+		
+		la $a1, baseAddress
+		li $t3, 0x000000
+		add $a1, $a1, $t1
+		sw $t3, 0($a1)
+		
+		li $t3, 0xfbbe27 
+		lw $t4, -4($a1)
+		beq $t4, $t3, projReplaceLeft
+		
+		li $t3, 0xffdc85
+		lw $t4, -4($a1)
+		beq $t4, $t3, projReplaceLeft
+		
+		li $t3, 0x000000
+		lw $t4, -4($a1)
+		bne $t4, $t3, deleteProjLeft
+		
+		li $t3, 0x0051ff
+		addi $t1, $t1, -4
+		sw $t3, -4($a1)
+		sw $t1, 4($a0)
+		j backMainThree
+		deleteProjLeft:
+			la $t2, baseAddress
+			add $t2, $t2, $t1
+			add $t0, $zero, $zero
+			sw $t0, 0($a0)
+			li $t3, 0x000000
+			sw $t3, 0($t2)
+			j backMainThree
+		projReplaceLeft:
+			la $t2, baseAddress
+			add $t2, $t2, $t1
+			add $t0, $zero, $zero
+			sw $t0, 0($a0)
+			li $t3, 0x000000
+			sw $t3, 0($t2)
+			li $t3, 0x0051ff
+			sw $t3, -4($t2)
+			sw $t3, -8($t2)
+			sw $t3, 252($t2)
+			sw $t3, 248($t2)
+			j backMainThree
+	backMainThree:
 	
 	# Check for keypresses, movement, shooting
 	li $t9, 0xffff0000
@@ -552,20 +727,20 @@ main:
 	j main
 
 resetRegisters:
-	addi $t0, $t0, 0
-	addi $t1, $t1, 0
-	addi $t2, $t2, 0
-	addi $t3, $t3, 0
-	addi $t4, $t4, 0
-	addi $t5, $t5, 0
-	addi $t6, $t6, 0
-	addi $t7, $t7, 0
-	addi $t8, $t8, 0
-	addi $t9, $t9, 0
-	addi $a0, $a0, 0
-	addi $a1, $a1, 0
-	addi $a2, $a2, 0
-	addi $a3, $a3, 0
+	addi $t0, $zero, 0
+	addi $t1, $zero, 0
+	addi $t2, $zero, 0
+	addi $t3, $zero, 0
+	addi $t4, $zero, 0
+	addi $t5, $zero, 0
+	addi $t6, $zero, 0
+	addi $t7, $zero, 0
+	addi $t8, $zero, 0
+	addi $t9, $zero, 0
+	addi $a0, $zero, 0
+	addi $a1, $zero, 0
+	addi $a2, $zero, 0
+	addi $a3, $zero, 0
 	jr $ra
 
 keyPress:
@@ -575,7 +750,61 @@ keyPress:
 	beq $t2, 0x77, up
 	beq $t2, 0x70, reset
 	beq $t2, 0x6f, finish
+	beq $t2, 0x71, shootLeft
+	beq $t2, 0x65, shoot
 	j main
+
+shoot:
+	# If a player projectile exists, do not fire, this will be checked by its position, 0 meaning that the projectile is not there
+	la $a0, projPosLeft
+	lw $t0, 0($a0)
+	bnez $t0, main
+	la $a0, projPos
+	lw $t0, 0($a0)
+	bnez $t0, main
+	# getting the supposed spawn position of the projectile
+	la $a1, currPos
+	lw $t2, 0($a1)
+	addi $t2, $t2, 8
+	# figuring out to see if that space is occupied with another pixel, i.e no room to shoot
+	la $t0, baseAddress
+	add $t0, $t0, $t2
+	lw $t1, 0($t0)
+	li $t3, 0x000000
+	bne $t1, $t3, main
+	# spawn the projectile and set its position in the word
+	li $t3, 0x0051ff
+	la $a0, projPos
+	sw $t2, 0($a0)
+	sw $t2, 4($a0)
+	sw $t3, 0($t0)
+	j main
+shootLeft:
+	# If a player projectile exists, do not fire, this will be checked by its position, 0 meaning that the projectile is not there
+	la $a0, projPos
+	lw $t0, 0($a0)
+	bnez $t0, main
+	
+	la $a0, projPosLeft
+	lw $t0, 0($a0)
+	bnez $t0, main
+	# getting the supposed spawn position of the projectile
+	la $a1, currPos
+	lw $t2, 0($a1)
+	addi $t2, $t2, -4
+	# figuring out to see if that space is occupied with another pixel, i.e no room to shoot
+	la $t0, baseAddress
+	add $t0, $t0, $t2
+	lw $t1, 0($t0)
+	li $t3, 0x000000
+	bne $t1, $t3, main
+	# spawn the projectile and set its position in the word
+	li $t3, 0x0051ff
+	la $a0, projPosLeft
+	sw $t2, 0($a0)
+	sw $t2, 4($a0)
+	sw $t3, 0($t0)
+	j main		
 # For left and right movement, store 4 onto the stack for left, store -4 onto the stack for right
 left:
 	addi $t3, $zero, 4
