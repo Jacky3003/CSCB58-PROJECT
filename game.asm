@@ -11,32 +11,29 @@
 # - Display width in pixels: 512 (update this as needed)
 # - Display height in pixels: 256 (update this as needed)
 # - Base Address for Display: 0x10008000 ($gp)
-# 
-# Milestone 1 Goals:
-# - Create a skeleton of the level design and the colours that could work well together
-# - Make the player character that has an attacking option
-# - Create breakable walls and obstacles in the players way
-# - Have a start and a finish to the game
 #
 # Which milestones have been reached in this submission?
 # (See the assignment handout for descriptions of the milestones)
-# - Milestone 1/2/3 (choose the one the applies)
+# - Milestone 3 (choose the one the applies)
 #
 # Which approved features have been implemented for milestone 3?
 # (See the assignment handout for the list of additional features)
-# 1. (fill in the feature, if any)
-# 2. (fill in the feature, if any)
-# 3. (fill in the feature, if any)
-# ... (add more if necessary)
+# 1. Fail Condition (1 Mark)
+# 2. Win Condition (1 Mark)
+# 3. Player can shoot projectiles (2 Marks)
+# 4. Enemies can shoot projectiles back (2 Marks)
+# 5. 3 Different pick-up effects (2 Marks)
+# 6. Start menu (1 Mark)
+# For a total of 9 marks.
 #
 # Link to video demonstration for final submission:
 # - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
 #
 # Are you OK with us sharing the video with people outside course staff?
-# - yes / no / yes, and please share this project github link as well!
+# - yes, and please share this project github link as well!
 #
 # Any additional information that the TA needs to know:
-# - (write here, if any)
+# - Thanks for playing the game! (Or watching the video I don't know how this is being marked).
 #
 #####################################################################
 
@@ -58,10 +55,335 @@ projPosLeft: .word 0, 0
 warpArrLoc: .word 640, 644, 896, 900
 reduceEnemiesLoc: .word 3672, 3676, 3928, 3932
 reducePlatformsLoc: .word 7408, 7412, 7664, 7668
+navButtonLoc: .word 2872, 2868, 3124, 3128
+
 # A test message for debugging.
 TEST_MSG: .asciiz "Testing Controls...\n"
 
 .text
+
+startMenu:
+	li $t0, baseAddress
+	li $t1, 0xffffff
+	# Title: CAVE
+	sw $t1, 2112($t0) #C
+	sw $t1, 2116($t0)
+	sw $t1, 2120($t0)
+	sw $t1, 2124($t0)
+	sw $t1, 1856($t0)
+	sw $t1, 1600($t0)
+	sw $t1, 1344($t0)
+	sw $t1, 1348($t0)
+	sw $t1, 1352($t0)
+	sw $t1, 1356($t0)
+	
+	sw $t1, 1364($t0) #A
+	sw $t1, 1108($t0)
+	sw $t1, 1112($t0)
+	sw $t1, 1116($t0)
+	sw $t1, 852($t0)
+	sw $t1, 596($t0)
+	sw $t1, 600($t0)
+	sw $t1, 604($t0)
+	sw $t1, 1376($t0)
+	sw $t1, 1120($t0)
+	sw $t1, 864($t0)
+	sw $t1, 608($t0)
+	
+	sw $t1, 1384($t0) #V
+	sw $t1, 1640($t0)
+	sw $t1, 1896($t0)
+	sw $t1, 2156($t0)
+	sw $t1, 2160($t0)
+	sw $t1, 1908($t0)
+	sw $t1, 1652($t0)
+	sw $t1, 1396($t0)
+	
+	sw $t1, 1404($t0) #E
+	sw $t1, 1148($t0)
+	sw $t1, 892($t0)
+	sw $t1, 896($t0)
+	sw $t1, 900($t0)
+	sw $t1, 636($t0)
+	sw $t1, 1408($t0)
+	sw $t1, 1412($t0)
+	sw $t1, 1416($t0)
+	sw $t1, 640($t0)
+	sw $t1, 644($t0)
+	sw $t1, 648($t0)
+	
+	li $t1, 0x999fc2
+	addi $t0, $t0, 40
+	li $t2, 0
+	titleBorderLoopTop:
+		beq $t2, 176, backMenuDrawOne
+		sw $t1, 0($t0)
+		addi $t0, $t0, 4
+		addi $t2, $t2, 4
+		j titleBorderLoopTop
+	backMenuDrawOne:
+	la $t0, baseAddress
+	addi $t0, $t0, 40
+	li $t2, 0
+	titleBorderLoopLeft:
+		beq $t2, 128, backMenuDrawTwo
+		sw $t1, 0($t0)
+		addi $t0, $t0, 256
+		addi $t2, $t2, 4
+		j titleBorderLoopLeft
+	backMenuDrawTwo:
+	
+	la $t0, baseAddress
+	addi $t0, $t0, 216
+	li $t2, 0
+	titleBorderLoopRight:
+		beq $t2, 128, backMenuDrawThree
+		sw $t1, 0($t0)
+		addi $t0, $t0, 256
+		addi $t2, $t2, 4
+		j titleBorderLoopRight
+	backMenuDrawThree:
+	li $t2, 0
+	la $t0, baseAddress
+	addi $t0, $t0, 8152
+	titleBorderLoopBottom:
+		beq $t2, 176, backMenuDrawFour
+		sw $t1, 0($t0)
+		addi $t0, $t0, -4
+		addi $t2, $t2, 4
+		j titleBorderLoopBottom
+	backMenuDrawFour:
+	# Select: START
+	la $t0, baseAddress
+	li $t1, 0xffffff
+	sw $t1, 2880($t0) #S
+	sw $t1, 2884($t0)
+	sw $t1, 2888($t0)
+	sw $t1, 2892($t0)
+	sw $t1, 3136($t0)
+	sw $t1, 3392($t0)
+	sw $t1, 3396($t0)
+	sw $t1, 3400($t0)
+	sw $t1, 3404($t0)
+	sw $t1, 3660($t0)
+	sw $t1, 3656($t0)
+	sw $t1, 3652($t0)
+	
+	sw $t1, 3672($t0) #T
+	sw $t1, 3416($t0)
+	sw $t1, 3160($t0)
+	sw $t1, 2904($t0)
+	sw $t1, 2900($t0)
+	sw $t1, 2908($t0)
+	sw $t1, 2912($t0)
+	
+	sw $t1, 2920($t0) #A
+	sw $t1, 2924($t0)
+	sw $t1, 2928($t0)
+	sw $t1, 2932($t0)
+	sw $t1, 3176($t0)
+	sw $t1, 3432($t0)
+	sw $t1, 3688($t0)
+	sw $t1, 3188($t0)
+	sw $t1, 3444($t0)
+	sw $t1, 3440($t0)
+	sw $t1, 3436($t0)
+	sw $t1, 3700($t0)
+	
+	sw $t1, 3708($t0) #R
+	sw $t1, 3452($t0)
+	sw $t1, 3196($t0)
+	sw $t1, 2940($t0)
+	sw $t1, 2944($t0)
+	sw $t1, 2948($t0)
+	sw $t1, 2952($t0)
+	sw $t1, 3208($t0)
+	sw $t1, 3464($t0)
+	sw $t1, 3460($t0)
+	sw $t1, 3456($t0)
+	sw $t1, 3716($t0)
+	
+	sw $t1, 2960($t0) #T
+	sw $t1, 2964($t0)
+	sw $t1, 2968($t0)
+	sw $t1, 2972($t0)
+	sw $t1, 3220($t0)
+	sw $t1, 3476($t0)
+	sw $t1, 3732($t0)
+	
+	# Select: EXIT
+	sw $t1, 4416($t0) #E
+	sw $t1, 4420($t0)
+	sw $t1, 4424($t0)
+	sw $t1, 4428($t0)
+	sw $t1, 4672($t0)
+	sw $t1, 4676($t0)
+	sw $t1, 4680($t0)
+	sw $t1, 4928($t0)
+	sw $t1, 5184($t0)
+	sw $t1, 5188($t0)
+	sw $t1, 5192($t0)
+	sw $t1, 5196($t0)
+	
+	sw $t1, 5204($t0) #X
+	sw $t1, 4436($t0)
+	sw $t1, 4448($t0)
+	sw $t1, 5216($t0)
+	sw $t1, 4952($t0)
+	sw $t1, 4696($t0)
+	sw $t1, 4956($t0)
+	sw $t1, 4700($t0)
+	
+	sw $t1, 5224($t0) #I
+	sw $t1, 5228($t0)
+	sw $t1, 5232($t0)
+	sw $t1, 5236($t0)
+	sw $t1, 4972($t0)
+	sw $t1, 4716($t0)
+	sw $t1, 4460($t0)
+	sw $t1, 4464($t0)
+	sw $t1, 4468($t0)
+	sw $t1, 4456($t0)
+	
+	
+	sw $t1, 4476($t0) #T
+	sw $t1, 4480($t0)
+	sw $t1, 4484($t0)
+	sw $t1, 4488($t0)
+	sw $t1, 4736($t0)
+	sw $t1, 4992($t0)
+	sw $t1, 5248($t0)
+	
+	# Select: BASIC
+	
+	sw $t1, 5952($t0) #B
+	sw $t1, 5956($t0)
+	sw $t1, 6208($t0)
+	sw $t1, 6216($t0)
+	sw $t1, 6464($t0)
+	sw $t1, 6468($t0)
+	sw $t1, 6476($t0)
+	sw $t1, 6720($t0)
+	sw $t1, 6728($t0)
+	
+	sw $t1, 6740($t0) #A
+	sw $t1, 6484($t0)
+	sw $t1, 6228($t0)
+	sw $t1, 5972($t0)
+	sw $t1, 5976($t0)
+	sw $t1, 5980($t0)
+	sw $t1, 5984($t0)
+	sw $t1, 6240($t0)
+	sw $t1, 6496($t0)
+	sw $t1, 6492($t0)
+	sw $t1, 6488($t0)
+	sw $t1, 6752($t0)
+	
+	sw $t1, 6764($t0) #S
+	sw $t1, 6768($t0)
+	sw $t1, 6772($t0)
+
+	sw $t1, 6516($t0)
+	sw $t1, 6512($t0)
+	sw $t1, 6508($t0)
+	sw $t1, 6504($t0)
+	sw $t1, 6004($t0)
+	sw $t1, 6000($t0)
+	sw $t1, 6248($t0)
+	sw $t1, 5996($t0)
+	sw $t1, 5992($t0)
+	
+	sw $t1, 6780($t0) #I
+	sw $t1, 6784($t0)
+	sw $t1, 6788($t0)
+	sw $t1, 6792($t0)
+	sw $t1, 6528($t0)
+	sw $t1, 6272($t0)
+	sw $t1, 6016($t0)
+	sw $t1, 6012($t0)
+	sw $t1, 6020($t0)
+	sw $t1, 6024($t0)
+	
+	sw $t1, 6032($t0) #C
+	sw $t1, 6036($t0)
+	sw $t1, 6040($t0)
+	sw $t1, 6044($t0)
+	sw $t1, 6288($t0)
+	sw $t1, 6544($t0)
+	sw $t1, 6800($t0)
+	sw $t1, 6804($t0)
+	sw $t1, 6808($t0)
+	sw $t1, 6812($t0)
+	
+	la $t0, baseAddress
+	li $t1, 0xff0000
+	sw $t1, 2872($t0) # Loading the navigation button.
+	sw $t1, 2868($t0)
+	sw $t1, 3128($t0)
+	sw $t1, 3124($t0)
+startMenuNav:
+	li $t9, 0xffff0000
+	lw $t8, 0($t9)
+	beq $t8, 1, keyPressMenu
+	j startMenuNav
+	
+keyPressMenu:
+	lw $t2, 4($t9)
+	beq $t2, 0x77, upMenu
+	beq $t2, 0x73, downMenu
+	beq $t2, 0x65, selectKey
+	j startMenuNav
+upMenu:
+	la $a1, navButtonLoc
+	li $t2, 0 
+	lw $t4, 0($a1)
+	beq $t4, 2872, startMenuNav
+	upMenuLoop:
+		beq $t2, 16, startMenuNav
+		li $t0, 0x000000
+		la $a0, baseAddress
+		lw $t1, 0($a1)
+		add $a0, $a0, $t1
+		sw $t0, 0($a0)
+		li $t0, 0xff0000
+		addi $a0, $a0, -1536
+		sw $t0, 0($a0)
+		addi $t1, $t1, -1536
+		sw $t1, 0($a1)
+		addi $t2, $t2, 4
+		addi $a1, $a1, 4
+		j upMenuLoop
+selectKey:
+	la $a1, navButtonLoc
+	lw $t4, 0($a1)
+	beq $t4, 2872, clear
+	beq $t4, 4408, startMenuNav #this will be the exit button, however I need to ask how this should be implemented.
+	beq $t4, 5944, basicMode
+	basicMode:
+		li $a3, 1
+		j clear
+downMenu:
+	la $a1, navButtonLoc
+	li $t2, 0 
+	lw $t4, 0($a1)
+	beq $t4, 5944, startMenuNav
+	downMenuLoop:
+		beq $t2, 16, startMenuNav
+		li $t0, 0x000000
+		la $a0, baseAddress
+		lw $t1, 0($a1)
+		add $a0, $a0, $t1
+		sw $t0, 0($a0)
+		
+		li $t0, 0xff0000
+		addi $a0, $a0, 1536
+		sw $t0, 0($a0)
+		addi $t1, $t1, 1536
+		sw $t1, 0($a1)
+		addi $t2, $t2, 4
+		addi $a1, $a1, 4
+		j downMenuLoop
+
 clear:
 	# clear needs to make sure moving objects have their positions reset (player, platform, enemy)
 	li $t0, baseAddress # $t0 stores the base address for display
@@ -376,6 +698,7 @@ loadDetails:
 			sw $t1, 7628($t0)
 			sw $t1, 7372($t0)
 			sw $t1, 7368($t0)
+	beq $a3, 1, loadRocks
 	loadReduceEnemies:
 		li $t1, 0x0284be
 		sw $t1, 3932($t0)
@@ -1251,11 +1574,9 @@ loseScreenShow:
 	sw $t1, 4160($t0) #Y
 	sw $t1, 4416($t0)
 	sw $t1, 4672($t0)
-	
 	sw $t1, 4676($t0)
 	sw $t1, 4680($t0)
 	sw $t1, 4684($t0)
-	
 	sw $t1, 4172($t0)
 	sw $t1, 4428($t0)
 	sw $t1, 4684($t0)
