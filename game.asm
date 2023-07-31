@@ -1063,7 +1063,7 @@ resetRegisters:
 	addi $a0, $zero, 0
 	addi $a1, $zero, 0
 	addi $a2, $zero, 0
-	addi $a3, $zero, 0
+#	addi $a3, $zero, 0
 	jr $ra
 
 keyPress:
