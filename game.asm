@@ -9,7 +9,7 @@
 # - Unit width in pixels: 8 (update this as needed)
 # - Unit height in pixels: 8 (update this as needed)
 # - Display width in pixels: 512 (update this as needed)
-# - Display height in pixels: 256 (update this as needed)
+# - Display height in pixels: 512 (update this as needed)
 # - Base Address for Display: 0x10008000 ($gp)
 #
 # Which milestones have been reached in this submission?
@@ -45,17 +45,16 @@
 
 # Game Variables, 8192 is the maximun coordinate
 playerStartPos: .word 520, 524, 776, 780
-#currPos: .word 520, 524, 776, 780
 currPos: .word 520, 524, 776, 780
 platPos: .word 0:8
 platColors: .word 0:8
 enemyProjPos: .word 4968, 5032
 projPos: .word 0, 0
 projPosLeft: .word 0, 0
-warpArrLoc: .word 640, 644, 896, 900
-reduceEnemiesLoc: .word 3672, 3676, 3928, 3932
-reducePlatformsLoc: .word 7408, 7412, 7664, 7668
-navButtonLoc: .word 2872, 2868, 3124, 3128
+warpArrLoc: .word 1152, 1156, 1408, 1412
+reduceEnemiesLoc: .word 4184, 4188, 4440, 4444
+reducePlatformsLoc: .word 15600, 15604, 15856, 15860
+navButtonLoc: .word 6968, 6964, 7224, 7220
 
 # A test message for debugging.
 TEST_MSG: .asciiz "Testing Controls...\n"
@@ -63,6 +62,7 @@ TEST_MSG: .asciiz "Testing Controls...\n"
 .text
 
 startMenu:
+	add $a3, $zero, $zero
 	li $t0, baseAddress
 	li $t1, 0xffffff
 	# Title: CAVE
@@ -112,6 +112,37 @@ startMenu:
 	sw $t1, 644($t0)
 	sw $t1, 648($t0)
 	
+	la $t0, baseAddress
+	li $t1, 0x999fc2
+	addi $t0, $t0, 2624
+	li $t2, 0
+	titleCardLoop:
+		sw $t1, 0($t0)
+		addi $t2, $t2, 4
+		addi $t0, $t0, 4
+		blt $t2, 76, titleCardLoop
+		
+	la $t0, baseAddress
+	li $t1, 0x5665bf
+	addi $t0, $t0, 4416
+	li $t2, 0
+	titleCardLoopTwo:
+		sw $t1, 0($t0)
+		addi $t2, $t2, 4
+		addi $t0, $t0, 4
+		blt $t2, 64, titleCardLoopTwo
+	
+	la $t0, baseAddress
+	li $t1, 0x152ebd
+	addi $t0, $t0, 6464
+	li $t2, 0
+	titleCardLoopThree:
+		sw $t1, 0($t0)
+		addi $t2, $t2, 4
+		addi $t0, $t0, 4
+		blt $t2, 52, titleCardLoopThree
+	
+	la $t0, baseAddress
 	li $t1, 0x999fc2
 	addi $t0, $t0, 40
 	li $t2, 0
@@ -126,7 +157,7 @@ startMenu:
 	addi $t0, $t0, 40
 	li $t2, 0
 	titleBorderLoopLeft:
-		beq $t2, 128, backMenuDrawTwo
+		beq $t2, 256, backMenuDrawTwo
 		sw $t1, 0($t0)
 		addi $t0, $t0, 256
 		addi $t2, $t2, 4
@@ -137,7 +168,7 @@ startMenu:
 	addi $t0, $t0, 216
 	li $t2, 0
 	titleBorderLoopRight:
-		beq $t2, 128, backMenuDrawThree
+		beq $t2, 256, backMenuDrawThree
 		sw $t1, 0($t0)
 		addi $t0, $t0, 256
 		addi $t2, $t2, 4
@@ -145,7 +176,7 @@ startMenu:
 	backMenuDrawThree:
 	li $t2, 0
 	la $t0, baseAddress
-	addi $t0, $t0, 8152
+	addi $t0, $t0, 16344
 	titleBorderLoopBottom:
 		beq $t2, 176, backMenuDrawFour
 		sw $t1, 0($t0)
@@ -156,171 +187,177 @@ startMenu:
 	# Select: START
 	la $t0, baseAddress
 	li $t1, 0xffffff
-	sw $t1, 2880($t0) #S
-	sw $t1, 2884($t0)
-	sw $t1, 2888($t0)
-	sw $t1, 2892($t0)
-	sw $t1, 3136($t0)
-	sw $t1, 3392($t0)
-	sw $t1, 3396($t0)
-	sw $t1, 3400($t0)
-	sw $t1, 3404($t0)
-	sw $t1, 3660($t0)
-	sw $t1, 3656($t0)
-	sw $t1, 3652($t0)
 	
-	sw $t1, 3672($t0) #T
-	sw $t1, 3416($t0)
-	sw $t1, 3160($t0)
-	sw $t1, 2904($t0)
-	sw $t1, 2900($t0)
-	sw $t1, 2908($t0)
-	sw $t1, 2912($t0)
+	sw $t1, 6976($t0) #S
+	sw $t1, 6980($t0)
+	sw $t1, 6984($t0)
+	sw $t1, 6988($t0)
+	sw $t1, 7232($t0)
+	sw $t1, 7488($t0)
+	sw $t1, 7492($t0)
+	sw $t1, 7496($t0)
+	sw $t1, 7500($t0)
+	sw $t1, 7756($t0)
+	sw $t1, 7752($t0)
+	sw $t1, 7748($t0)
 	
-	sw $t1, 2920($t0) #A
-	sw $t1, 2924($t0)
-	sw $t1, 2928($t0)
-	sw $t1, 2932($t0)
-	sw $t1, 3176($t0)
-	sw $t1, 3432($t0)
-	sw $t1, 3688($t0)
-	sw $t1, 3188($t0)
-	sw $t1, 3444($t0)
-	sw $t1, 3440($t0)
-	sw $t1, 3436($t0)
-	sw $t1, 3700($t0)
+	sw $t1, 7768($t0) #T
+	sw $t1, 7512($t0)
+	sw $t1, 7256($t0)
+	sw $t1, 7000($t0)
+	sw $t1, 6996($t0)
+	sw $t1, 7004($t0)
+	sw $t1, 7008($t0)
 	
-	sw $t1, 3708($t0) #R
-	sw $t1, 3452($t0)
-	sw $t1, 3196($t0)
-	sw $t1, 2940($t0)
-	sw $t1, 2944($t0)
-	sw $t1, 2948($t0)
-	sw $t1, 2952($t0)
-	sw $t1, 3208($t0)
-	sw $t1, 3464($t0)
-	sw $t1, 3460($t0)
-	sw $t1, 3456($t0)
-	sw $t1, 3716($t0)
+	sw $t1, 7016($t0) #A
+	sw $t1, 7020($t0)
+	sw $t1, 7024($t0)
+	sw $t1, 7028($t0)
+	sw $t1, 7272($t0)
+	sw $t1, 7540($t0)
+	sw $t1, 7784($t0)
+	sw $t1, 7284($t0)
+	sw $t1, 7536($t0)
+	sw $t1, 7532($t0)
+	sw $t1, 7528($t0)
+	sw $t1, 7796($t0)
 	
-	sw $t1, 2960($t0) #T
-	sw $t1, 2964($t0)
-	sw $t1, 2968($t0)
-	sw $t1, 2972($t0)
-	sw $t1, 3220($t0)
-	sw $t1, 3476($t0)
-	sw $t1, 3732($t0)
+	sw $t1, 7804($t0) #R
+	sw $t1, 7548($t0)
+	sw $t1, 7292($t0)
+	sw $t1, 7036($t0)
+	sw $t1, 7040($t0)
+	sw $t1, 7044($t0)
+	sw $t1, 7048($t0)
+	sw $t1, 7304($t0)
+	sw $t1, 7560($t0)
+	sw $t1, 7556($t0)
+	sw $t1, 7552($t0)
+	sw $t1, 7804($t0)
+	sw $t1, 7812($t0)
+	
+	sw $t1, 7056($t0) #T
+	sw $t1, 7060($t0)
+	sw $t1, 7064($t0)
+	sw $t1, 7068($t0)
+	sw $t1, 7316($t0)
+	sw $t1, 7572($t0)
+	sw $t1, 7828($t0)
 	
 	# Select: EXIT
-	sw $t1, 4416($t0) #E
-	sw $t1, 4420($t0)
-	sw $t1, 4424($t0)
-	sw $t1, 4428($t0)
-	sw $t1, 4672($t0)
-	sw $t1, 4676($t0)
-	sw $t1, 4680($t0)
-	sw $t1, 4928($t0)
-	sw $t1, 5184($t0)
-	sw $t1, 5188($t0)
-	sw $t1, 5192($t0)
-	sw $t1, 5196($t0)
 	
-	sw $t1, 5204($t0) #X
-	sw $t1, 4436($t0)
-	sw $t1, 4448($t0)
-	sw $t1, 5216($t0)
-	sw $t1, 4952($t0)
-	sw $t1, 4696($t0)
-	sw $t1, 4956($t0)
-	sw $t1, 4700($t0)
+	sw $t1, 8512($t0) #E
+	sw $t1, 8516($t0)
+	sw $t1, 8520($t0)
+	sw $t1, 8524($t0)
+	sw $t1, 8768($t0)
+	sw $t1, 8772($t0)
+	sw $t1, 8776($t0)
+	sw $t1, 9024($t0)
+	sw $t1, 9292($t0)
+	sw $t1, 9288($t0)
+	sw $t1, 9280($t0)
+	sw $t1, 9284($t0)
 	
-	sw $t1, 5224($t0) #I
-	sw $t1, 5228($t0)
-	sw $t1, 5232($t0)
-	sw $t1, 5236($t0)
-	sw $t1, 4972($t0)
-	sw $t1, 4716($t0)
-	sw $t1, 4460($t0)
-	sw $t1, 4464($t0)
-	sw $t1, 4468($t0)
-	sw $t1, 4456($t0)
+	sw $t1, 8544($t0)
+	sw $t1, 8532($t0)
+	sw $t1, 9312($t0)
+	sw $t1, 9300($t0)
+	sw $t1, 9052($t0)
+	sw $t1, 8792($t0)
+	sw $t1, 9048($t0)
+	sw $t1, 8796($t0)
 	
-	
-	sw $t1, 4476($t0) #T
-	sw $t1, 4480($t0)
-	sw $t1, 4484($t0)
-	sw $t1, 4488($t0)
-	sw $t1, 4736($t0)
-	sw $t1, 4992($t0)
-	sw $t1, 5248($t0)
-	
-	# Select: BASIC
-	
-	sw $t1, 5952($t0) #B
-	sw $t1, 5956($t0)
-	sw $t1, 6208($t0)
-	sw $t1, 6216($t0)
-	sw $t1, 6464($t0)
-	sw $t1, 6468($t0)
-	sw $t1, 6476($t0)
-	sw $t1, 6720($t0)
-	sw $t1, 6728($t0)
-	
-	sw $t1, 6740($t0) #A
-	sw $t1, 6484($t0)
-	sw $t1, 6228($t0)
-	sw $t1, 5972($t0)
-	sw $t1, 5976($t0)
-	sw $t1, 5980($t0)
-	sw $t1, 5984($t0)
-	sw $t1, 6240($t0)
-	sw $t1, 6496($t0)
-	sw $t1, 6492($t0)
-	sw $t1, 6488($t0)
-	sw $t1, 6752($t0)
-	
-	sw $t1, 6764($t0) #S
-	sw $t1, 6768($t0)
-	sw $t1, 6772($t0)
+	sw $t1, 9332($t0) #I
+	sw $t1, 9320($t0)
+	sw $t1, 9324($t0)
+	sw $t1, 9328($t0)
+	sw $t1, 9068($t0)
+	sw $t1, 8812($t0)
+	sw $t1, 8556($t0)
+	sw $t1, 8560($t0)
+	sw $t1, 8564($t0)
+	sw $t1, 8552($t0)
 
-	sw $t1, 6516($t0)
-	sw $t1, 6512($t0)
-	sw $t1, 6508($t0)
-	sw $t1, 6504($t0)
-	sw $t1, 6004($t0)
-	sw $t1, 6000($t0)
-	sw $t1, 6248($t0)
-	sw $t1, 5996($t0)
-	sw $t1, 5992($t0)
 	
-	sw $t1, 6780($t0) #I
-	sw $t1, 6784($t0)
-	sw $t1, 6788($t0)
-	sw $t1, 6792($t0)
-	sw $t1, 6528($t0)
-	sw $t1, 6272($t0)
-	sw $t1, 6016($t0)
-	sw $t1, 6012($t0)
-	sw $t1, 6020($t0)
-	sw $t1, 6024($t0)
+	sw $t1, 8572($t0) #T
+	sw $t1, 8576($t0)
+	sw $t1, 8580($t0)
+	sw $t1, 8584($t0)
+	sw $t1, 8832($t0)
+	sw $t1, 9088($t0)
+	sw $t1, 9344($t0)
+
+	# Select: BASIC
+
+	sw $t1, 10048($t0) #B
+	sw $t1, 10052($t0)
+	sw $t1, 10304($t0)
+	sw $t1, 10312($t0)
+	sw $t1, 10560($t0)
+	sw $t1, 10564($t0)
+	sw $t1, 10572($t0)
+	sw $t1, 10816($t0)
+	sw $t1, 10824($t0)
+
+
+	sw $t1, 10836($t0) #A
+	sw $t1, 10580($t0)
+	sw $t1, 10324($t0)
+	sw $t1, 10068($t0)
+	sw $t1, 10072($t0)
+	sw $t1, 10076($t0)
+	sw $t1, 10080($t0)
+	sw $t1, 10336($t0)
+	sw $t1, 10592($t0)
+	sw $t1, 10588($t0)
+	sw $t1, 10584($t0)
+	sw $t1, 10848($t0)
+
+	sw $t1, 10860($t0) #S
+	sw $t1, 10864($t0)
+	sw $t1, 10868($t0)
+	sw $t1, 10612($t0)
+	sw $t1, 10608($t0)
+	sw $t1, 10604($t0)
+	sw $t1, 10600($t0)
+	sw $t1, 10100($t0)
+	sw $t1, 10096($t0)
+	sw $t1, 10344($t0)
+	sw $t1, 10092($t0)
+	sw $t1, 10088($t0)
+
 	
-	sw $t1, 6032($t0) #C
-	sw $t1, 6036($t0)
-	sw $t1, 6040($t0)
-	sw $t1, 6044($t0)
-	sw $t1, 6288($t0)
-	sw $t1, 6544($t0)
-	sw $t1, 6800($t0)
-	sw $t1, 6804($t0)
-	sw $t1, 6808($t0)
-	sw $t1, 6812($t0)
-	
+	sw $t1, 10876($t0) #I
+	sw $t1, 10880($t0)
+	sw $t1, 10884($t0)
+	sw $t1, 10888($t0)
+	sw $t1, 10624($t0)
+	sw $t1, 10368($t0)
+	sw $t1, 10108($t0)
+	sw $t1, 10112($t0)
+	sw $t1, 10116($t0)
+	sw $t1, 10120($t0)
+
+
+	sw $t1, 10128($t0) #C
+	sw $t1, 10132($t0)
+	sw $t1, 10136($t0)
+	sw $t1, 10140($t0)
+	sw $t1, 10384($t0)
+	sw $t1, 10640($t0)
+	sw $t1, 10896($t0)
+	sw $t1, 10900($t0)
+	sw $t1, 10904($t0)
+	sw $t1, 10908($t0)
+
 	la $t0, baseAddress
 	li $t1, 0xff0000
-	sw $t1, 2872($t0) # Loading the navigation button.
-	sw $t1, 2868($t0)
-	sw $t1, 3128($t0)
-	sw $t1, 3124($t0)
+	
+	sw $t1, 6968($t0) # Loading the navigation button.
+	sw $t1, 6964($t0)
+	sw $t1, 7224($t0)
+	sw $t1, 7220($t0)
 startMenuNav:
 	li $t9, 0xffff0000
 	lw $t8, 0($t9)
@@ -337,7 +374,7 @@ upMenu:
 	la $a1, navButtonLoc
 	li $t2, 0 
 	lw $t4, 0($a1)
-	beq $t4, 2872, startMenuNav
+	beq $t4, 6968, startMenuNav
 	upMenuLoop:
 		beq $t2, 16, startMenuNav
 		li $t0, 0x000000
@@ -356,9 +393,9 @@ upMenu:
 selectKey:
 	la $a1, navButtonLoc
 	lw $t4, 0($a1)
-	beq $t4, 2872, clear
-	beq $t4, 4408, startMenuNav #this will be the exit button, however I need to ask how this should be implemented.
-	beq $t4, 5944, basicMode
+	beq $t4, 6968, clear
+	beq $t4, 8504, startMenuNav #this will be the exit button, however I need to ask how this should be implemented.
+	beq $t4, 10040, basicMode
 	basicMode:
 		li $a3, 1
 		j clear
@@ -366,7 +403,7 @@ downMenu:
 	la $a1, navButtonLoc
 	li $t2, 0 
 	lw $t4, 0($a1)
-	beq $t4, 5944, startMenuNav
+	beq $t4, 10040, startMenuNav
 	downMenuLoop:
 		beq $t2, 16, startMenuNav
 		li $t0, 0x000000
@@ -390,7 +427,7 @@ clear:
 	li $t1, 0x000000
 	addi $t2, $zero, 0
 	reloadMap:
-		beq $t2, 8192, nextOne
+		beq $t2, 16384, nextOne
 		sw $t1, 0($t0)
 		addi $t0, $t0, 4
 		addi $t2, $t2, 4
@@ -432,8 +469,8 @@ loadCharacter: # The character itself is 2x2
 	sw $t1, 520($t0)
 	sw $t1, 780($t0)
 	li $t1, 0x7de7ff #Stores light blue
-	sw $t1, 524($t0)
 	sw $t1, 776($t0)
+	sw $t1, 524($t0)
 	
 # Loading Map
 	li $t0, baseAddress
@@ -451,12 +488,12 @@ loadCeli:
 	li $t0, baseAddress
 # Loads the ground border
 loadFloor:
-	sw $t1, 7936($t0)
-	sw $t1, 7680($t0)
+	sw $t1, 15872($t0) # 7936
+	sw $t1, 16128($t0)
 	addi $t0, $t0, 4
 	addi $t3, $t3, -1
 	bnez $t3, loadFloor
-	li $t3, 32
+	li $t3, 64
 	li $t0, baseAddress
 # Loads the Left and Right borders
 loadWalls:
@@ -469,10 +506,10 @@ loadWalls:
 	bnez $t3, loadWalls
 
 	li $t0, baseAddress
-	li $t3, 16
+	li $t3, 32
 	
 # Loads various platforms
-	sw $t1, 4424($t0)
+	sw $t1, 8520($t0)
 loadInnerWalls:
 	sw $t1, 332($t0)
 	sw $t1, 328($t0)
@@ -493,7 +530,7 @@ loadInnerWalls:
 		addi $t0, $t0, 4
 		addi $t3, $t3, -1
 		bnez $t3, prepExtraThree
-	li $t3, 16
+	li $t3, 32
 	loadExtraThree:
 		sw $t1, 332($t0)
 		sw $t1, 328($t0)
@@ -526,7 +563,7 @@ loadInnerWalls:
 		addi $t0, $t0, 4
 		addi $t3, $t3, -1
 		bnez $t3, prepExtraFiveX
-	li $t3, 12
+	li $t3, 24
 	prepExtraFiveY:
 		addi $t0, $t0, 256
 		addi $t3, $t3, -1
@@ -652,14 +689,20 @@ loadDetails:
 		sw $t1, 4972($t0)
 		sw $t1, 4712($t0)
 		sw $t1, 4716($t0)
+		
+		li $t1, 0x999fc2
+		sw $t1, 4700($t0)
+		sw $t1, 4956($t0)
+		sw $t1, 4952($t0)
+		sw $t1, 4696($t0)
 	loadSpikes:
 		spikeOne:
 			li $t1, 0xfbbe27
-			sw $t1, 7464($t0)
-			sw $t1, 7468($t0)
+			sw $t1, 15696($t0)
+			sw $t1, 15700($t0)
 			li $t1, 0xffdc85
-			sw $t1, 7208($t0)
-			sw $t1, 7212($t0)
+			sw $t1, 15444($t0)
+			sw $t1, 15440($t0)
 		spikeTwo:
 			li $t1, 0xfbbe27
 			sw $t1, 2112($t0)
@@ -690,36 +733,65 @@ loadDetails:
 			sw $t1, 4364($t0)
 		spikeFour:
 			li $t1, 0xfbbe27
-			sw $t1, 7880($t0)
+			sw $t1, 16072($t0)
+			sw $t1, 15816($t0)
+			sw $t1, 15560($t0)
 			li $t1, 0xffdc85
-			sw $t1, 7884($t0)
-			sw $t1, 7876($t0)
-			sw $t1, 7624($t0)
-			sw $t1, 7628($t0)
-			sw $t1, 7372($t0)
-			sw $t1, 7368($t0)
+			sw $t1, 16076($t0)
+			sw $t1, 15820($t0)
+			sw $t1, 15564($t0)
+		spikeFive:
+			li $t1, 0xfbbe27
+			sw $t1, 8200($t0)
+			sw $t1, 8204($t0)
+			sw $t1, 8212($t0)
+			sw $t1, 8468($t0)
+			li $t1, 0xffdc85
+			sw $t1, 8208($t0)
+			sw $t1, 8456($t0)
+			sw $t1, 8460($t0)
+			sw $t1, 8464($t0)
+		spikeSix:
+			la $t0, baseAddress
+			li $t2, 0
+			add $t0, $t0, 9736
+			spikeSixLoop:
+				li $t1, 0xfbbe27
+				sw $t1, 0($t0)
+				li $t1, 0xffdc85
+				sw $t1, 256($t0)
+				addi $t0, $t0, 4
+				addi $t2, $t2, 4
+				blt $t2, 56, spikeSixLoop
+			la $t0, baseAddress
+		spikeSeven:
+			li $t1, 0xfbbe27
+			li $t1, 0xffdc85
+		spikeEight:
+			li $t1, 0xfbbe27
+			li $t1, 0xffdc85
 	beq $a3, 1, loadRocks
 	loadReduceEnemies:
 		li $t1, 0x0284be
-		sw $t1, 3932($t0)
-		sw $t1, 3928($t0)
+		sw $t1, 4440($t0)
+		sw $t1, 4444($t0)
 		li $t1, 0x0be1f5
-		sw $t1, 3672($t0)
-		sw $t1, 3676($t0)
+		sw $t1, 4188($t0)
+		sw $t1, 4184($t0)
 	loadReducePlatforms:
 		li $t1 0xe2d2e7
-		sw $t1, 7412($t0)
-		sw $t1, 7664($t0)
+		sw $t1, 15604($t0)
+		sw $t1, 15856($t0)
 		li $t1, 0xac6ca1
-		sw $t1, 7408($t0)
-		sw $t1, 7668($t0)
+		sw $t1, 15600($t0)
+		sw $t1, 15860($t0)
 	loadWarp:
 		li $t1 0xcba591
-		sw $t1, 5108($t0)
-		sw $t1, 4848($t0)
+		sw $t1, 8180($t0)
+		sw $t1, 7920($t0)
 		li $t1 0xa46440
-		sw $t1, 5104($t0)
-		sw $t1, 4852($t0)
+		sw $t1, 8176($t0)
+		sw $t1, 7924($t0)
 	loadRocks:
 		rockOne:
 			li $t1, 0x8d8fa5 
@@ -740,19 +812,24 @@ loadDetails:
 			sw $t1, 368($t0)
 		rockThree:
 			li $t1, 0x8d8fa5 
-			sw $t1, 4292($t0)
-			sw $t1, 4296($t0)
-			sw $t1, 4300($t0)
-			sw $t1, 4288($t0)
-			sw $t1, 4284($t0)
+			sw $t1, 8388($t0)
+			sw $t1, 8392($t0)
+			sw $t1, 8396($t0)
+			sw $t1, 8384($t0)
+			sw $t1, 8380($t0)
 			li $t1, 0xc3c3cd
-			sw $t1, 4536($t0)
-			sw $t1, 4544($t0)
-			sw $t1, 4548($t0)
-			sw $t1, 4800($t0)
-			sw $t1, 4804($t0)
-			sw $t1, 4280($t0)
-			sw $t1, 4792($t0)
+			sw $t1, 8632($t0)
+			sw $t1, 8640($t0)
+			sw $t1, 8644($t0)
+			sw $t1, 8900($t0)
+			sw $t1, 8896($t0)
+			sw $t1, 8888($t0)
+			sw $t1, 8376($t0)
+			sw $t1, 9144($t0)
+			sw $t1, 9400($t0)
+			sw $t1, 9656($t0)
+			sw $t1, 9912($t0)
+			sw $t1, 10168($t0)
 		rockFour:
 			li $t1, 0x8d8fa5
 			sw $t1, 412($t0)
@@ -763,21 +840,21 @@ loadDetails:
 			sw $t1, 420($t0)
 		rockFive:
 			li $t1, 0x8d8fa5
-			sw $t1, 7700($t0)
+			sw $t1, 15892($t0)
 			li $t1, 0xc3c3cd
-			sw $t1, 7704($t0)
+			sw $t1, 15896($t0)
 			li $t1, 0x52bbd7
-			sw $t1, 7708($t0)
+			sw $t1, 15900($t0)
 		rockSix:
 			li $t1, 0x8d8fa5
-			sw $t1, 7732($t0)
+			sw $t1, 15924($t0)
 			li $t1, 0xc3c3cd
-			sw $t1, 7740($t0)
-			sw $t1, 7736($t0)
+			sw $t1, 15932($t0)
+			sw $t1, 15936($t0)
 			li $t1, 0x52bbd7
-			sw $t1, 7744($t0)
+			sw $t1, 15940($t0)
 		bigRock:
-			addi $t0, $t0, 6304
+			addi $t0, $t0, 10400
 			li $t1, 0x8d8fa5
 			li $t3, 7
 			bigRockLoopOne:
@@ -786,38 +863,6 @@ loadDetails:
 				addi $t0, $t0, 4
 				addi $t3, $t3, -1
 				bnez $t3, bigRockLoopOne
-			addi $t0, $t0, -6304
-			li $t1, 0x054ca0
-			sw $t1, 6044($t0)
-			sw $t1, 6040($t0)
-			sw $t1, 6036($t0)
-			sw $t1, 5780($t0)
-			sw $t1, 5020($t0)
-			sw $t1, 5276($t0)
-			sw $t1, 5532($t0)
-			sw $t1, 5784($t0)
-			sw $t1, 5788($t0)
-			sw $t1, 6044($t0)
-			sw $t1, 6300($t0)
-			sw $t1, 6556($t0)
-			sw $t1, 7324($t0)
-			sw $t1, 7580($t0)
-			li $t1, 0x52bbd7
-			sw $t1, 6812($t0)
-			sw $t1, 6804($t0)
-			sw $t1, 6800($t0)
-			sw $t1, 6808($t0)
-			sw $t1, 6796($t0)
-			sw $t1, 6792($t0)
-			sw $t1, 6788($t0)
-			
-			sw $t1, 7068($t0)
-			sw $t1, 7060($t0)
-			sw $t1, 7056($t0)
-			sw $t1, 7064($t0)
-			sw $t1, 7052($t0)
-			sw $t1, 7048($t0)
-			sw $t1, 7044($t0)
 	j main
 .globl main
 
@@ -1324,7 +1369,7 @@ checkLeftRightCol:
 		# make item dissapear
 		li $t2, 0x000000
 		li $t0, baseAddress
-		addi $t0, $t0, 4848
+		addi $t0, $t0, 7920
 		sw $t2, 0($t0)
 		sw $t2, 4($t0)
 		sw $t2, 256($t0)
@@ -1471,7 +1516,7 @@ winScreen:
 	li $t1, 0x000000
 	addi $t2, $zero, 0
 	reloadMapWin:
-		beq $t2, 8192, winScreenShow
+		beq $t2, 16384, winScreenShow
 		sw $t1, 0($t0)
 		addi $t0, $t0, 4
 		addi $t2, $t2, 4
@@ -1561,7 +1606,7 @@ loseScreen:
 	li $t1, 0x000000
 	addi $t2, $zero, 0
 	reloadMapLose:
-		beq $t2, 8192, loseScreenShow
+		beq $t2, 16384, loseScreenShow
 		sw $t1, 0($t0)
 		addi $t0, $t0, 4
 		addi $t2, $t2, 4
