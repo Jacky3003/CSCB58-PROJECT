@@ -48,7 +48,7 @@ playerStartPos: .word 520, 524, 776, 780
 currPos: .word 520, 524, 776, 780
 platPos: .word 0:8
 platColors: .word 0:8
-enemyProjPos: .word 4968, 5032
+enemyProjPos: .word 4968, 5104
 projPos: .word 0, 0
 projPosLeft: .word 0, 0
 warpArrLoc: .word 1152, 1156, 1408, 1412
@@ -358,6 +358,37 @@ startMenu:
 	sw $t1, 6964($t0)
 	sw $t1, 7224($t0)
 	sw $t1, 7220($t0)
+	
+	la $t0, baseAddress
+	li $t1, 0x999fc2
+	addi $t0, $t0, 15168
+	li $t2, 0
+	titleCardLoopFour:
+		sw $t1, 0($t0)
+		addi $t2, $t2, 4
+		addi $t0, $t0, 4
+		blt $t2, 76, titleCardLoopFour
+		
+	la $t0, baseAddress
+	li $t1, 0x5665bf
+	addi $t0, $t0, 13376
+	li $t2, 0
+	titleCardLoopFive:
+		sw $t1, 0($t0)
+		addi $t2, $t2, 4
+		addi $t0, $t0, 4
+		blt $t2, 64, titleCardLoopFive
+	
+	la $t0, baseAddress
+	li $t1, 0x152ebd
+	addi $t0, $t0, 11328
+	li $t2, 0
+	titleCardLoopSix:
+		sw $t1, 0($t0)
+		addi $t2, $t2, 4
+		addi $t0, $t0, 4
+		blt $t2, 52, titleCardLoopSix
+	
 startMenuNav:
 	li $t9, 0xffff0000
 	lw $t8, 0($t9)
@@ -765,11 +796,28 @@ loadDetails:
 				blt $t2, 56, spikeSixLoop
 			la $t0, baseAddress
 		spikeSeven:
-			li $t1, 0xfbbe27
-			li $t1, 0xffdc85
+			addi $t0, $t0, 8844
+			li $t2, 0
+			spikeSevenLoop:
+				li $t1, 0xfbbe27
+				sw $t1, 0($t0)
+				li $t1, 0xffdc85
+				sw $t1, -4($t0)
+				addi $t0, $t0, 256
+				addi $t2, $t2, 4
+				blt $t2, 32, spikeSevenLoop
+			la $t0, baseAddress
 		spikeEight:
 			li $t1, 0xfbbe27
+			sw $t1, 10448($t0)
+			sw $t1, 10452($t0)
+			sw $t1, 10704($t0)
+			sw $t1, 10460($t0)
 			li $t1, 0xffdc85
+			sw $t1, 10456($t0)
+			sw $t1, 10708($t0)
+			sw $t1, 10712($t0)
+			sw $t1, 10716($t0)
 	beq $a3, 1, loadRocks
 	loadReduceEnemies:
 		li $t1, 0x0284be
@@ -818,18 +866,20 @@ loadDetails:
 			sw $t1, 8384($t0)
 			sw $t1, 8380($t0)
 			li $t1, 0xc3c3cd
+			addi $t0, $t0, 8376
+			li $t2, 0
+			rockThreeLoop:
+				sw $t1, 0($t0)
+				addi $t2, $t2, 4
+				addi $t0, $t0, 256
+				blt $t2, 120, rockThreeLoop
+			la $t0, baseAddress
 			sw $t1, 8632($t0)
 			sw $t1, 8640($t0)
 			sw $t1, 8644($t0)
 			sw $t1, 8900($t0)
 			sw $t1, 8896($t0)
 			sw $t1, 8888($t0)
-			sw $t1, 8376($t0)
-			sw $t1, 9144($t0)
-			sw $t1, 9400($t0)
-			sw $t1, 9656($t0)
-			sw $t1, 9912($t0)
-			sw $t1, 10168($t0)
 		rockFour:
 			li $t1, 0x8d8fa5
 			sw $t1, 412($t0)
@@ -853,6 +903,64 @@ loadDetails:
 			sw $t1, 15936($t0)
 			li $t1, 0x52bbd7
 			sw $t1, 15940($t0)
+		rockSeven:
+			li $t1, 0x8d8fa5
+			sw $t1, 15796($t0)
+			sw $t1, 15792($t0)
+			li $t1, 0xc3c3cd
+			sw $t1, 15788($t0)
+			sw $t1, 15784($t0)
+			sw $t1, 15540($t0)
+			li $t1, 0x52bbd7
+			sw $t1, 15536($t0)
+			sw $t1, 15532($t0)
+			sw $t1, 15528($t0)
+		rockEight:
+			li $t1, 0x8d8fa5
+			sw $t1, 15676($t0)
+			sw $t1, 15672($t0)
+			li $t1, 0xc3c3cd
+			sw $t1, 15668($t0)
+			sw $t1, 15664($t0)
+			sw $t1, 15420($t0)
+			li $t1, 0x52bbd7
+			sw $t1, 15416($t0)
+			sw $t1, 15412($t0)
+			sw $t1, 15408($t0)
+		rockNine:
+			li $t1, 0x8d8fa5
+			sw $t1, 8948($t0)
+			sw $t1, 9204($t0)
+			li $t1, 0xc3c3cd
+			sw $t1, 8944($t0)
+			sw $t1, 9200($t0)
+			li $t1, 0x52bbd7
+			sw $t1, 9196($t0)
+			sw $t1, 9192($t0)
+			sw $t1, 8940($t0)
+			sw $t1, 8936($t0)
+		rockTen:
+			li $t1, 0x8d8fa5
+			sw $t1, 612($t0)
+			sw $t1, 608($t0)
+			sw $t1, 604($t0)
+			sw $t1, 600($t0)
+			li $t1, 0xc3c3cd
+			sw $t1, 868($t0)
+			sw $t1, 864($t0)
+			sw $t1, 860($t0)
+			sw $t1, 856($t0)
+		rockEleven:
+			li $t1, 0x8d8fa5
+			sw $t1, 572($t0)
+			sw $t1, 568($t0)
+			sw $t1, 564($t0)
+			sw $t1, 560($t0)
+			li $t1, 0xc3c3cd
+			sw $t1, 828($t0)
+			sw $t1, 824($t0)
+			sw $t1, 820($t0)
+			sw $t1, 816($t0)
 		bigRock:
 			addi $t0, $t0, 10400
 			li $t1, 0x8d8fa5
@@ -984,7 +1092,6 @@ main:
 			sw $t3, 264($t2)
 			j backMainTwo
 	backMainTwo:
-	# Check if player has been redrawn to black
 	
 	la $a0, projPosLeft
 	lw $t0, 0($a0)
