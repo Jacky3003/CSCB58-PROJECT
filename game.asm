@@ -27,10 +27,11 @@
 # For a total of 9 marks.
 #
 # Link to video demonstration for final submission:
-# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
+# - https://www.youtube.com/watch?v=wuuJ4dPXJMk (Make sure we can view it!)
 #
 # Are you OK with us sharing the video with people outside course staff?
 # - yes, and please share this project github link as well!
+# - https://github.com/Jacky3003/CSCB58-PROJECT
 #
 # Any additional information that the TA needs to know:
 # - Thanks for playing the game! (Or watching the video I don't know how this is being marked).
@@ -425,11 +426,14 @@ selectKey:
 	la $a1, navButtonLoc
 	lw $t4, 0($a1)
 	beq $t4, 6968, clear
-	beq $t4, 8504, startMenuNav #this will be the exit button, however I need to ask how this should be implemented.
+	beq $t4, 8504, exitProgram #this will be the exit button, however I need to ask how this should be implemented.
 	beq $t4, 10040, basicMode
 	basicMode:
 		li $a3, 1
 		j clear
+exitProgram:
+	li $v0, 10
+	syscall
 downMenu:
 	la $a1, navButtonLoc
 	li $t2, 0 
